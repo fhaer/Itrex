@@ -54,6 +54,7 @@ contract Itrex {
       mid.ownerAccount = ownerAccount;
       mid.metadata = metadata;
       mid.blockTimestamp = block.timestamp;
+      descriptors[modelHash] = mid;
   }
 
   /** 
@@ -74,6 +75,7 @@ contract Itrex {
   function registerState(bytes32 instHash, bytes32 stateHash) public {
       require(instances[instHash] > 0, "instance unknown");
       require(descriptors[instHash].ownerAccount == msg.sender, "state registration not permitted");
+      
       states[stateHash] = instHash;
   }
 
