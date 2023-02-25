@@ -97,7 +97,7 @@ contract Itrex {
       require(instances[instHash] > 0, "instance unknown");
       require(states[preStateHash] > 0, "pre-state unknown");
       require(states[postStateHash] > 0, "post-state unknown");
-      require(states[preStateHash] == states[preStateHash], "pre- and post-state are from different instances");
+      require(states[preStateHash] == states[postStateHash], "pre- and post-state are from different instances");
       require(descriptors[instHash].ownerAccount == msg.sender, "transition event not permitted");
 
       emit TransitionEvent(instHash, preStateHash, postStateHash);
