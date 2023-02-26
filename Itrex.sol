@@ -31,6 +31,7 @@ contract Itrex {
       bytes32 metadata;
       address ownerAccount;
       uint blockTimestamp;
+      bool isTerminated;
   }
 
   /** 
@@ -66,6 +67,7 @@ contract Itrex {
       mid.ownerAccount = ownerAccount;
       mid.metadata = metadata;
       mid.blockTimestamp = block.timestamp;
+      mid.isTerminated = false;
       descriptors[instHash] = mid;
   }
 
@@ -75,6 +77,7 @@ contract Itrex {
   function registerState(bytes32 instHash, bytes32 stateHash) public {
       require(instances[instHash] > 0, "instance unknown");
       require(descriptors[instHash].ownerAccount == msg.sender, "state registration not permitted");
+      require(descriptors[instHash].isTerminated == false, "instance is terminated");
       
       states[stateHash] = instHash;
   }
@@ -85,9 +88,20 @@ contract Itrex {
   function registerTransition(bytes32 instHash, bytes32 preStateHash, bytes32 postStateHash) public {
       require(instances[instHash] > 0, "instance unknown");
       require(descriptors[instHash].ownerAccount == msg.sender, "transition registration not permitted");
+      require(descriptors[instHash].isTerminated == false, "instance is terminated");
 
       bytes32 transitionHash = getTransitionHash(preStateHash, postStateHash);
       transitions[instHash] = transitionHash;
+  }
+  
+  /** 
+   * @dev terminates a running instance
+   */
+  function terminateInstance(bytes32 instHash) public {
+      require(instances[instHash] > 0, "instance unknown");
+      require(descriptors[instHash].ownerAccount == msg.sender, "termination of instance not permitted");
+      
+      descriptors[instHash].isTerminated = true;
   }
 
   /** 
@@ -99,6 +113,7 @@ contract Itrex {
       require(states[postStateHash] > 0, "post-state unknown");
       require(states[preStateHash] == states[postStateHash], "pre- and post-state are from different instances");
       require(descriptors[instHash].ownerAccount == msg.sender, "transition event not permitted");
+      require(descriptors[instHash].isTerminated == false, "instance is terminated");
 
       emit TransitionEvent(instHash, preStateHash, postStateHash);
   }
